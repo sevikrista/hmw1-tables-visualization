@@ -1,0 +1,17 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+## Chargement des données :
+
+```{r}
+
+files <- sort(list.files(path = "DATA", pattern = "-Data\\.csv$", full.names = TRUE))
+
+tbl <- lapply(files, read_csv)
+
+names(tbl) <- 2010:2024
+
+```
