@@ -49,9 +49,59 @@ for (i in 1:15) {
 ```
 
 ```{r}
-tbl["2015"]
+tbl["2024"]
+```
+
+Les éléments sont des chaînes de caractères : on sépare le premier élément de chaque colonne (qui correspond à la description des données de chaque colonne), et on convertit le reste en numériques.
+
+```{r}
+
+desc = list()
+
+for (i in 1:15){
+  desc[i] <- lapply(tbl[i], function(x) unlist(x[1, ]))
+  
+  tbl[i] <- lapply(tbl[i], function(x) {
+  data <- x[-1, ]
+  data[, -1] <- lapply(data[, -1], function(col) suppressWarnings(as.numeric(col)))
+  data
+})
+  
+  
+  
+}
+
+
 ```
 
 ```{r}
-unlist(tbl[[15]][1,])
+names(desc)<-2010:2024
+```
+
+```{r}
+sum(tbl[["2024"]]["S1501_C01_00E"])
+```
+
+```{r}
+c_age<-c(rep("18-24 ans",4),rep("25 ans et plus", 4))
+educ0<- rep(c("Moins que lycée","Lycée","Études sup.","BSc"),2)
+
+```
+
+```{r}
+data0 <- c(sum(tbl[["2024"]]["S1501_C01_002E"]),sum(tbl[["2024"]]["S1501_C01_003E"]),sum(tbl[["2024"]]["S1501_C01_004E"]),sum(tbl[["2024"]]["S1501_C01_005E"]),sum(tbl[["2024"]]["S1501_C01_007E"])+sum(tbl[["2024"]]["S1501_C01_008E"]),sum(tbl[["2024"]]["S1501_C01_009E"]),sum(tbl[["2024"]]["S1501_C01_010E"])+sum(tbl[["2024"]]["S1501_C01_011E"]),sum(tbl[["2024"]]["S1501_C01_012E"]))
+data0
+```
+
+```{r}
+ddata <- data.frame(c_age,educ0,data0)
+```
+
+```{r}
+ggplot(ddata, aes(fill=educ0, y=data0, x=c_age)) + 
+    geom_bar(position="fill", stat="identity")
+```
+
+```{r}
+desc[["2024"]]
 ```
