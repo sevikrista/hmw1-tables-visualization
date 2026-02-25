@@ -15,3 +15,43 @@ tbl <- lapply(files, read_csv)
 names(tbl) <- 2010:2024
 
 ```
+
+```{r}
+tbl[["2024"]]
+```
+
+On retire la première colonne, ainsi que les colonnes correspondant aux marges d'erreur des estimations, que nous n'utiliserons pas.
+
+```{r}
+for (i in 1:15){
+  tbl[i]<-lapply(tbl[i], function(x) x %>% select(-contains("GEO_ID")))
+
+  }
+```
+
+```{r}
+for (i in 1:15){
+  tbl[i]<-lapply(tbl[i], function(x) x %>% select(-ends_with("M")))
+
+  }
+```
+
+On retire également les colonnes dont les données sont manquantes (notées par un (X)).
+
+```{r}
+for (i in 1:15) {
+  tbl[[i]] <- lapply(tbl[i], function(x) {
+    keep <- sapply(x, function(col) mean(col[-(1:2)] == "(X)", na.rm = TRUE) < 0.9)
+    keep[is.na(keep)] <- TRUE
+    x[, keep]
+  })[[1]]
+}
+```
+
+```{r}
+tbl["2015"]
+```
+
+```{r}
+unlist(tbl[[15]][1,])
+```
