@@ -103,5 +103,32 @@ ggplot(ddata, aes(fill=educ0, y=data0, x=c_age)) +
 ```
 
 ```{r}
-desc[["2024"]]
+data1 <- c(sum(tbl[["2015"]]["S1501_C01_002E"]),sum(tbl[["2015"]]["S1501_C01_003E"]),sum(tbl[["2015"]]["S1501_C01_004E"]),sum(tbl[["2015"]]["S1501_C01_005E"]),sum(tbl[["2015"]]["S1501_C01_007E"])+sum(tbl[["2015"]]["S1501_C01_008E"]),sum(tbl[["2015"]]["S1501_C01_009E"]),sum(tbl[["2015"]]["S1501_C01_010E"])+sum(tbl[["2015"]]["S1501_C01_011E"]),sum(tbl[["2015"]]["S1501_C01_012E"]))
+data1
+```
+
+```{r}
+ddata1 <- data.frame(c_age,educ0,data1)
+ggplot(ddata1, aes(fill=educ0, y=data1, x=c_age)) + 
+    geom_bar(position="fill", stat="identity")
+
+
+```
+
+```{r}
+c_eth<-c(rep("Blanc",3),rep("Noir", 3),rep("Asiatique",3),rep("Hispanique",3))
+educ1<- rep(c("Moins que lycée","Lycée","BSc"),4)
+
+data_eth_2024 <- c(sum(tbl[["2024"]][["S1501_C01_031E"]])-sum(tbl[["2024"]][["S1501_C01_032E"]]),sum(tbl[["2024"]][["S1501_C01_032E"]])-sum(tbl[["2024"]][["S1501_C01_033E"]]),sum(tbl[["2024"]][["S1501_C01_033E"]]),sum(tbl[["2024"]][["S1501_C01_034E"]])-sum(tbl[["2024"]][["S1501_C01_035E"]]),sum(tbl[["2024"]][["S1501_C01_035E"]])-sum(tbl[["2024"]][["S1501_C01_036E"]]),sum(tbl[["2024"]][["S1501_C01_036E"]]),sum(tbl[["2024"]][["S1501_C01_040E"]])-sum(tbl[["2024"]][["S1501_C01_041E"]]),sum(tbl[["2024"]][["S1501_C01_041E"]])-sum(tbl[["2024"]][["S1501_C01_042E"]]),sum(tbl[["2024"]][["S1501_C01_042E"]]),sum(tbl[["2024"]][["S1501_C01_052E"]])-sum(tbl[["2024"]][["S1501_C01_053E"]]),sum(tbl[["2024"]][["S1501_C01_053E"]])-sum(tbl[["2024"]][["S1501_C01_054E"]]),sum(tbl[["2024"]][["S1501_C01_054E"]]))
+
+
+ddata_eth_2024 <- data.frame(c_eth,educ1,data_eth_2024)
+ggplot(ddata_eth_2024, aes(fill=educ1, y=data_eth_2024, x=c_eth)) + 
+    geom_bar(position="fill", stat="identity")
+
+
+```
+
+```{r}
+
 ```
