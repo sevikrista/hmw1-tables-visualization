@@ -126,9 +126,82 @@ ddata_eth_2024 <- data.frame(c_eth,educ1,data_eth_2024)
 ggplot(ddata_eth_2024, aes(fill=educ1, y=data_eth_2024, x=c_eth)) + 
     geom_bar(position="fill", stat="identity")
 
-
 ```
 
 ```{r}
 
+1+1
+```
+
+```{r}
+
+```
+
+```{r}
+df <- tbl[["2024"]]  
+
+ggplot(df, aes(
+  x = (S1501_C01_005E + S1501_C01_015E) / (S1501_C01_001E + S1501_C01_006E) #proportion de personnes avec Bachelor
+  ,
+  y = S1501_C01_059E #revenu médian, 
+  ,color = S1501_C01_031E > S1501_C01_052E # plus de blancs ou d'hispaniques ?
+)) + geom_point(alpha = 0.7)
+
+#revenu médian en fonction de la proportion de diplômés (bachelor et +)
+#rouge : + d'hispaniques, bleu : + de blancs
+```
+
+```{r}
+
+ggplot(df, aes(
+  x = (S1501_C01_005E + S1501_C01_015E) / (S1501_C01_001E + S1501_C01_006E) 
+  ,
+  y = 0.01*((S1501_C02_007E +S1501_C02_008E)*S1501_C02_055E + (S1501_C02_009E)*S1501_C02_056E + (S1501_C02_010E +S1501_C02_011E)*S1501_C02_057E + S1501_C02_015E*S1501_C02_058E) #taux de pauvreté total
+  ,color = S1501_C01_031E > S1501_C01_052E 
+)) + geom_point(alpha = 0.7)
+
+#taux de pauvreté en fonction de la proportion de diplomés
+```
+
+```{r}
+
+
+ggplot(df, aes(
+  x = S1501_C01_059E
+  ,
+  y = 0.01*((S1501_C02_007E +S1501_C02_008E)*S1501_C02_055E + (S1501_C02_009E)*S1501_C02_056E + (S1501_C02_010E +S1501_C02_011E)*S1501_C02_057E + S1501_C02_015E*S1501_C02_058E) #taux de pauvreté total
+  ,color = S1501_C01_031E > S1501_C01_052E 
+)) + geom_point(alpha = 0.7)
+
+
+#taux de pauvreté en fonction du revenu médian
+```
+
+```{r}
+
+annees <-rep(as.character(2015:2024), each = 4)
+eth_annees<- rep(c("Blanc","Hispanique","Asiatique","Noir"),10)
+an0 <- as.character(2015:2024)
+dethan <- array(40)
+
+for (i in 1:10){
+  dethan[4*(i-1)+1]<-sum(tbl[[an0[i]]][["S1501_C01_031E"]])
+  dethan[4*(i-1)+2]<-sum(tbl[[an0[i]]][["S1501_C01_052E"]])
+  dethan[4*(i-1)+3]<-sum(tbl[[an0[i]]][["S1501_C01_040E"]])
+  dethan[4*(i-1)+4]<-sum(tbl[[an0[i]]][["S1501_C01_034E"]])
+}
+
+
+dfethan <- data.frame(annees,eth_annees,dethan)
+ggplot(dfethan, aes(fill=eth_annees, y=dethan, x=annees)) + 
+    geom_bar(position="fill", stat="identity")
+
+
+
+
+
+```
+
+```{r}
+desc[["2015"]]
 ```
