@@ -203,5 +203,58 @@ ggplot(dfethan, aes(fill=eth_annees, y=dethan, x=annees)) +
 ```
 
 ```{r}
-desc[["2015"]]
+
+an1 <-as.character(2010:2024)
+medmed <- rep(0,15)
+moymed <- rep(0,15)
+names(medmed)<-2010:2024
+names(moymed)<-2010:2024
+for(i in 2010:2014){
+  medmed[as.character(i)]<- median(tbl[[as.character(i)]][["S1501_C01_032E"]],na.rm=TRUE)
+  moymed[as.character(i)]<- mean(tbl[[as.character(i)]][["S1501_C01_032E"]],na.rm=TRUE)
+}
+
+for(i in 2015:2024){
+  medmed[as.character(i)]<- median(tbl[[as.character(i)]][["S1501_C01_059E"]],na.rm=TRUE)
+  moymed[as.character(i)]<- mean(tbl[[as.character(i)]][["S1501_C01_059E"]],na.rm=TRUE)
+}
+
+
+```
+
+```{r}
+
+datamed <- data.frame(year = an1,value = medmed)
+
+ggplot(datamed, aes(x = an1, y = medmed)) + 
+  geom_point() + 
+  geom_line()
+
+
+```
+
+Remarque : on remarque une chute en 2015, peut-être due à un changement de méthodologie (beaucoup de changements dans le dataset entre 2014 et 2015)
+
+```{r}
+
+l_d_eth <-list()
+
+
+
+
+for (i in 2015:2024){
+  l_d_eth[[as.character(i-2014)]] <- c(sum(tbl[[as.character(i)]][["S1501_C01_031E"]])-sum(tbl[[as.character(i)]][["S1501_C01_032E"]]),sum(tbl[[as.character(i)]][["S1501_C01_032E"]])-sum(tbl[[as.character(i)]][["S1501_C01_033E"]]),sum(tbl[[as.character(i)]][["S1501_C01_033E"]]),sum(tbl[[as.character(i)]][["S1501_C01_034E"]])-sum(tbl[[as.character(i)]][["S1501_C01_035E"]]),sum(tbl[[as.character(i)]][["S1501_C01_035E"]])-sum(tbl[[as.character(i)]][["S1501_C01_036E"]]),sum(tbl[[as.character(i)]][["S1501_C01_036E"]]),sum(tbl[[as.character(i)]][["S1501_C01_040E"]])-sum(tbl[[as.character(i)]][["S1501_C01_041E"]]),sum(tbl[[as.character(i)]][["S1501_C01_041E"]])-sum(tbl[[as.character(i)]][["S1501_C01_042E"]]),sum(tbl[[as.character(i)]][["S1501_C01_042E"]]),sum(tbl[[as.character(i)]][["S1501_C01_052E"]])-sum(tbl[[as.character(i)]][["S1501_C01_053E"]]),sum(tbl[[as.character(i)]][["S1501_C01_053E"]])-sum(tbl[[as.character(i)]][["S1501_C01_054E"]]),sum(tbl[[as.character(i)]][["S1501_C01_054E"]]))
+  
+  
+  
+} 
+
+#contient entre 2015 et 2024 le nombre de personnes à chaque niveau de diplôme par groupe ethnique
+
+
+names(l_d_eth)<-2015:2024
+```
+
+```{r}
+
 ```
