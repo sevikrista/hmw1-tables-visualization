@@ -4,15 +4,18 @@ format: html
 editor: visual
 ---
 
-# À propos de la base de données :
+À propos de la base de données :
 
-Les tables utilisée dans cette présentation sont issues du American Community Survey, qui sont des statistiques annuelles effectuées par le American Census Bureau, en plus de leurs statistiques décennales. Elles sont disponibles au <https://data.census.gov>. Celles utilisées ici concernent le comté de Ventura en Californie, situé immédiatemment à l'ouest du comté de Los Angeles. Elles comportent des données économiques en fonction de facteurs démographiques, entre 2010 et 2024 (les données à partir de 2015 sont plus détaillées). Chaque grandeur est donnée par "census tract", soit des subdivisions géographiques du comté.
+Les tables utilisée dans cette présentation sont issues du American Community Survey, qui sont des statistiques annuelles effectuées par le American Census Bureau, en plus de leurs statistiques décennales. Elles sont disponibles au https://data.census.gov. Celles utilisées ici concernent le comté de Ventura en Californie, situé immédiatemment à l'ouest du comté de Los Angeles. Elles comportent des données économiques en fonction de facteurs démographiques, entre 2010 et 2024 (les données à partir de 2015 sont plus détaillées). Chaque grandeur est donnée par "census tract", soit des subdivisions géographiques du comté.
 
-## Chargement et traitement préalable des données :
+Chargement et traitement préalable des données :
 
 La table contient pour chaque donnée, sa marge d'erreur associée, qui ne sera pas utilisée ici. Certaines données ont également été jugées trop confidentielles pour être rendues publiques, et ont donc chaque grandeur de la colonne a été remplacée par un (X) : il faut également les retirer. Il faudra ensuite convertir les chaînes de caractères en nombres.
 
-```{r}
+{r}
+
+library(tidyverse)
+library(plotly)
 
 files <- sort(list.files(path = "DATA", pattern = "-Data\\.csv$", full.names = TRUE))
 
@@ -55,13 +58,12 @@ for (i in 1:15){
 
 
 
-```
 
-## Analyses démographiques
+Analyses démographiques
 
-### Âge
+Âge
 
-```{r}
+{r}
 
 
 df_all <- bind_rows(
@@ -84,7 +86,8 @@ df_all %>%
   mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
   ggplot(aes(x = factor(année), y = proportion, fill = classe_dage)) +
   geom_bar(stat = "identity")+
-  labs(x = "années", y = "", fill = "Classe d'âge")+
+  labs(title= "Distribution des classes d'âge dans le comté de Ventura (2010-2024)",
+    x = "années", y = "", fill = "Classe d'âge")+
   scale_fill_manual(values = c("S1501_C01_001E" = "cyan3",
                "S1501_C01_016E" = "green3",
                "S1501_C01_019E" = "salmon",
@@ -100,13 +103,14 @@ df_all %>%
 
 
 
-```
 
-### Répartition "ethnique"
+Ce graphique montre la répartition des différentes classes d’âge dans le comté de Ventura entre 2010 et 2024. On observe que la structure d’âge reste globalement assez stable sur l’ensemble de la période. Les classes d’âge intermédiaires, notamment les 25-44 ans, représentent une part importante de la population. On remarque également une légère augmentation de la proportion des personnes âgées de 65 ans et plus au fil des années, ce qui pourrait refléter un phénomène de vieillissement progressif de la population.
+
+Répartition "ethnique"
 
 Part de chaque groupe ethnique du comté de Ventura, selon les définition bien sûr très discutables des organismes officiels américains. Certains groupes très minoritaires (ex. natifs Hawaïens), ne sont pas pris en compte. Le groupe "blanc" correspond aux personnes ne s'identifiant pas également comme "hispanique".
 
-```{r}
+{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -127,7 +131,11 @@ df_all %>%
   mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
   ggplot(aes(x = factor(année), y = proportion, fill = groupe_ethnique)) +
   geom_bar(stat = "identity")+
-  labs(x = "années", y = "", fill = "Groupe ethnique")+
+  labs(
+    title= "Répartition ethnique du comté de Ventura (2015-2024)",
+    x = "années", 
+    y = "", 
+    fill = "Groupe ethnique")+
   scale_fill_manual(values = c("S1501_C01_031E" = "cyan3",
                "S1501_C01_052E" = "green3",
                "S1501_C01_040E" = "salmon",
@@ -138,15 +146,16 @@ df_all %>%
                "S1501_C01_034E" = "Noir"))
 
 
-```
 
-## Analyses économiques
+Ce graphique présente l’évolution de la répartition ethnique dans le comté de Ventura entre 2015 et 2024. On observe que les populations blanche et hispanique représentent les parts les plus importantes de la population. La proportion de la population hispanique semble légèrement augmenter au cours de la période étudiée, tandis que les autres groupes restent relativement stables. Ces évolutions peuvent refléter des dynamiques démographiques locales liées à la migration ou aux différences de structure d’âge entre les groupes.
 
-### Niveau de diplôme :
+Analyses économiques
+
+Niveau de diplôme :
 
 "En-dessous de lycée" signifie que la personne n'a pas terminé le lycée, "Études supérieures" signifie que la personne a entamé un premier cycle d'études supérieures sans le terminer ou a obtenu un diplôme de niveau inférieur à celui de bachelor. "Bachelor" correspond à un diplôme de premier cycle, équivalent de la licence.
 
-```{r}
+{r}
 df_all <- bind_rows(
   lapply(2010:2014, function(y) {
     tbl[[as.character(y)]] %>%
@@ -186,7 +195,8 @@ df_all %>%
   mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
   ggplot(aes(x = factor(année), y = proportion, fill = niveau_detude)) +
   geom_bar(stat = "identity")+
-  labs(x = "années", y = "", fill = "Niveau d'étude")+
+  labs(title= "Distribution du niveau d'étude dans le comté de Ventura",
+       x = "années", y = "", fill = "Niveau d'étude")+
   scale_fill_manual(values = c("sublycee" = "cyan3",
                "lycee" = "green3",
                "uni" = "salmon",
@@ -195,11 +205,10 @@ df_all %>%
                "lycee" = "Lycée",
                "uni" = "Études Supérieures",
                "bachelor" = "Bachelor ou plus"))
-```
 
-L'on remarque un saut entre 2014 et 2015 : la base de donnée a énormément changé entre ces deux années, les agrégations et les calculs étaient donc différents, il y a donc possiblement une incompréhension des données ou une erreur de calcul de notre côté.
+On remarque un saut entre 2014 et 2015 : la base de donnée a énormément changé entre ces deux années, les agrégations et les calculs étaient donc différents, il y a donc possiblement une incompréhension des données ou une erreur de calcul de notre côté. 
 
-```{r}
+{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -265,9 +274,10 @@ df_all %>%
 
 
 
-```
 
-```{r}
+Ce graphique montre l’évolution de la proportion de personnes possédant au moins un diplôme de niveau bachelor selon les classes d’âge. Les groupes d’âge intermédiaires présentent généralement les proportions les plus élevées. On observe aussi une tendance globalement croissante au cours de la période, ce qui peut traduire une progression de l’accès à l’enseignement supérieur.
+
+{r}
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
     tbl[[as.character(y)]] %>%
@@ -352,9 +362,8 @@ plot_ly(df_plot,
 
 
 
-```
 
-```{r}
+{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -408,11 +417,12 @@ df_all %>%
 
 
 
-```
 
-### Analyses par Census Tract
+Ce graphique met en évidence une relation nette entre niveau d’étude et pauvreté. Les personnes ayant un diplôme de niveau bachelor ou plus présentent systématiquement un taux de pauvreté plus faible que les autres groupes. À l’inverse, les individus ayant un niveau d’étude plus faible restent davantage exposés à la précarité économique.
 
-```{r}
+Analyses par Census Tract
+
+{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -463,8 +473,13 @@ plot_ly(df_plot,
 
 
 
+Cette visualisation permet de croiser trois dimensions : le niveau d’étude, le revenu médian et le taux de pauvreté. On observe globalement qu’un taux plus élevé de diplômés du supérieur est associé à un revenu médian plus élevé et à un taux de pauvreté plus faible. Même si cette représentation ne permet pas d’établir un lien causal, elle met en évidence une structure socio-économique cohérente entre les variables étudiées.
 
+Appendice
 
+Dans cette section, nous présentons le code utilisé pour charger les données, effectuer les transformations nécessaires et produire les visualisations présentées dans ce rapport.
 
+Les différentes étapes incluent : - le chargement des données depuis les fichiers CSV, - le nettoyage des données (suppression des marges d’erreur et des valeurs manquantes), - la transformation des variables pour permettre les analyses, - la production des graphiques avec les packages ggplot2 et plotly.
 
-```
+L’ensemble du code utilisé pour ces opérations est inclus dans les blocs R du document afin de garantir la reproductibilité de l’analyse.
+
