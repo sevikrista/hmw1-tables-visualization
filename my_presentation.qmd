@@ -1,21 +1,46 @@
 ---
 title: "Hmw I : Tables and visualization"
 format: html
-editor: visual
+
+
+
+execute: 
+  eval: true
+  echo: false
+  warning: false
+  message: false
+  
 ---
 
-À propos de la base de données :
+# À propos de la base de données :
 
-Les tables utilisée dans cette présentation sont issues du American Community Survey, qui sont des statistiques annuelles effectuées par le American Census Bureau, en plus de leurs statistiques décennales. Elles sont disponibles au https://data.census.gov. Celles utilisées ici concernent le comté de Ventura en Californie, situé immédiatemment à l'ouest du comté de Los Angeles. Elles comportent des données économiques en fonction de facteurs démographiques, entre 2010 et 2024 (les données à partir de 2015 sont plus détaillées). Chaque grandeur est donnée par "census tract", soit des subdivisions géographiques du comté.
+Les tables utilisée dans cette présentation sont issues du American Community Survey, qui sont des statistiques annuelles effectuées par le American Census Bureau, en plus de leurs statistiques décennales. Elles sont disponibles au <https://data.census.gov>. Celles utilisées ici concernent le comté de Ventura en Californie, situé immédiatemment à l'ouest du comté de Los Angeles. Elles comportent des données économiques en fonction de facteurs démographiques, entre 2010 et 2024 (les données à partir de 2015 sont plus détaillées). Chaque grandeur est donnée par "census tract", soit des subdivisions géographiques du comté.
 
-Chargement et traitement préalable des données :
+## Chargement et traitement préalable des données :
 
 La table contient pour chaque donnée, sa marge d'erreur associée, qui ne sera pas utilisée ici. Certaines données ont également été jugées trop confidentielles pour être rendues publiques, et ont donc chaque grandeur de la colonne a été remplacée par un (X) : il faut également les retirer. Il faudra ensuite convertir les chaînes de caractères en nombres.
 
-{r}
 
-library(tidyverse)
+```{r}
+#| label: setup
+#| include: false
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 library(plotly)
+library(rmarkdown)
+library(tidyverse)
+
+```
+
+
+
+
+```{r}
 
 files <- sort(list.files(path = "DATA", pattern = "-Data\\.csv$", full.names = TRUE))
 
@@ -58,12 +83,13 @@ for (i in 1:15){
 
 
 
+```
 
-Analyses démographiques
+## Analyses démographiques
 
-Âge
+### Âge
 
-{r}
+```{r}
 
 
 df_all <- bind_rows(
@@ -86,8 +112,7 @@ df_all %>%
   mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
   ggplot(aes(x = factor(année), y = proportion, fill = classe_dage)) +
   geom_bar(stat = "identity")+
-  labs(title= "Distribution des classes d'âge dans le comté de Ventura (2010-2024)",
-    x = "années", y = "", fill = "Classe d'âge")+
+  labs(title = "Distribution des classes d'âge dans le comté de Ventura (2010-2024)",x = "années", y = "", fill = "Classe d'âge")+
   scale_fill_manual(values = c("S1501_C01_001E" = "cyan3",
                "S1501_C01_016E" = "green3",
                "S1501_C01_019E" = "salmon",
@@ -103,14 +128,15 @@ df_all %>%
 
 
 
+```
 
 Ce graphique montre la répartition des différentes classes d’âge dans le comté de Ventura entre 2010 et 2024. On observe que la structure d’âge reste globalement assez stable sur l’ensemble de la période. Les classes d’âge intermédiaires, notamment les 25-44 ans, représentent une part importante de la population. On remarque également une légère augmentation de la proportion des personnes âgées de 65 ans et plus au fil des années, ce qui pourrait refléter un phénomène de vieillissement progressif de la population.
 
-Répartition "ethnique"
+### Répartition "ethnique"
 
 Part de chaque groupe ethnique du comté de Ventura, selon les définition bien sûr très discutables des organismes officiels américains. Certains groupes très minoritaires (ex. natifs Hawaïens), ne sont pas pris en compte. Le groupe "blanc" correspond aux personnes ne s'identifiant pas également comme "hispanique".
 
-{r}
+```{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -131,11 +157,7 @@ df_all %>%
   mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
   ggplot(aes(x = factor(année), y = proportion, fill = groupe_ethnique)) +
   geom_bar(stat = "identity")+
-  labs(
-    title= "Répartition ethnique du comté de Ventura (2015-2024)",
-    x = "années", 
-    y = "", 
-    fill = "Groupe ethnique")+
+  labs(title= "Répartition ethnique du comté de Ventura (2015-2024)",x = "années", y = "", fill = "Groupe ethnique")+
   scale_fill_manual(values = c("S1501_C01_031E" = "cyan3",
                "S1501_C01_052E" = "green3",
                "S1501_C01_040E" = "salmon",
@@ -146,16 +168,17 @@ df_all %>%
                "S1501_C01_034E" = "Noir"))
 
 
+```
 
 Ce graphique présente l’évolution de la répartition ethnique dans le comté de Ventura entre 2015 et 2024. On observe que les populations blanche et hispanique représentent les parts les plus importantes de la population. La proportion de la population hispanique semble légèrement augmenter au cours de la période étudiée, tandis que les autres groupes restent relativement stables. Ces évolutions peuvent refléter des dynamiques démographiques locales liées à la migration ou aux différences de structure d’âge entre les groupes.
 
-Analyses économiques
+## Analyses économiques
 
-Niveau de diplôme :
+### Niveau de diplôme :
 
 "En-dessous de lycée" signifie que la personne n'a pas terminé le lycée, "Études supérieures" signifie que la personne a entamé un premier cycle d'études supérieures sans le terminer ou a obtenu un diplôme de niveau inférieur à celui de bachelor. "Bachelor" correspond à un diplôme de premier cycle, équivalent de la licence.
 
-{r}
+```{r}
 df_all <- bind_rows(
   lapply(2010:2014, function(y) {
     tbl[[as.character(y)]] %>%
@@ -195,8 +218,7 @@ df_all %>%
   mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
   ggplot(aes(x = factor(année), y = proportion, fill = niveau_detude)) +
   geom_bar(stat = "identity")+
-  labs(title= "Distribution du niveau d'étude dans le comté de Ventura",
-       x = "années", y = "", fill = "Niveau d'étude")+
+  labs(title= "Distribution du niveau d'étude dans le comté de Ventura",x = "années", y = "", fill = "Niveau d'étude")+
   scale_fill_manual(values = c("sublycee" = "cyan3",
                "lycee" = "green3",
                "uni" = "salmon",
@@ -205,10 +227,11 @@ df_all %>%
                "lycee" = "Lycée",
                "uni" = "Études Supérieures",
                "bachelor" = "Bachelor ou plus"))
+```
 
-On remarque un saut entre 2014 et 2015 : la base de donnée a énormément changé entre ces deux années, les agrégations et les calculs étaient donc différents, il y a donc possiblement une incompréhension des données ou une erreur de calcul de notre côté. 
+L'on remarque un saut entre 2014 et 2015 : la base de donnée a énormément changé entre ces deux années, les agrégations et les calculs étaient donc différents, il y a donc possiblement une incompréhension des données ou une erreur de calcul de notre côté.
 
-{r}
+```{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -274,10 +297,11 @@ df_all %>%
 
 
 
+```
 
 Ce graphique montre l’évolution de la proportion de personnes possédant au moins un diplôme de niveau bachelor selon les classes d’âge. Les groupes d’âge intermédiaires présentent généralement les proportions les plus élevées. On observe aussi une tendance globalement croissante au cours de la période, ce qui peut traduire une progression de l’accès à l’enseignement supérieur.
 
-{r}
+```{r}
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
     tbl[[as.character(y)]] %>%
@@ -349,6 +373,7 @@ plot_ly(df_plot,
         frame = ~année,
         type = "bar") %>%
   layout(
+    title = "Niveau d'étude par groupe ethnique (2015-2024)",
     barmode = "stack",
     xaxis = list(title = ""),
     yaxis = list(title = "Proportion", range = c(0, 1)),
@@ -362,8 +387,9 @@ plot_ly(df_plot,
 
 
 
+```
 
-{r}
+```{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -417,12 +443,13 @@ df_all %>%
 
 
 
+```
 
 Ce graphique met en évidence une relation nette entre niveau d’étude et pauvreté. Les personnes ayant un diplôme de niveau bachelor ou plus présentent systématiquement un taux de pauvreté plus faible que les autres groupes. À l’inverse, les individus ayant un niveau d’étude plus faible restent davantage exposés à la précarité économique.
 
-Analyses par Census Tract
+### Analyses par Census Tract
 
-{r}
+```{r}
 
 df_all <- bind_rows(
   lapply(2015:2024, function(y) {
@@ -473,9 +500,15 @@ plot_ly(df_plot,
 
 
 
+
+
+
+
+```
+
 Cette visualisation permet de croiser trois dimensions : le niveau d’étude, le revenu médian et le taux de pauvreté. On observe globalement qu’un taux plus élevé de diplômés du supérieur est associé à un revenu médian plus élevé et à un taux de pauvreté plus faible. Même si cette représentation ne permet pas d’établir un lien causal, elle met en évidence une structure socio-économique cohérente entre les variables étudiées.
 
-Appendice
+#Appendice
 
 Dans cette section, nous présentons le code utilisé pour charger les données, effectuer les transformations nécessaires et produire les visualisations présentées dans ce rapport.
 
@@ -483,3 +516,457 @@ Les différentes étapes incluent : - le chargement des données depuis les fich
 
 L’ensemble du code utilisé pour ces opérations est inclus dans les blocs R du document afin de garantir la reproductibilité de l’analyse.
 
+```{r eval=FALSE, echo=TRUE}
+
+
+files <- sort(list.files(path = "DATA", pattern = "-Data\\.csv$", full.names = TRUE))
+
+tbl <- lapply(files, read_csv)
+
+names(tbl) <- 2010:2024
+
+for (i in 1:15){
+  tbl[i]<-lapply(tbl[i], function(x) x %>% select(-contains("GEO_ID")))
+
+  } #première colonne correspondant à l'indice du census tract : on ne l'utilise pas
+
+for (i in 1:15){
+  tbl[i]<-lapply(tbl[i], function(x) x %>% select(-ends_with("M")))
+
+  } # colonnes correspondant aux marges d'erreur
+
+for (i in 1:15) {
+  tbl[[i]] <- lapply(tbl[i], function(x) {
+    keep <- sapply(x, function(col) mean(col[-(1:2)] == "(X)", na.rm = TRUE) < 0.9)
+    keep[is.na(keep)] <- TRUE
+    x[, keep]
+  })[[1]]
+} # colonnes aux données manquantes
+
+desc = list()
+
+for (i in 1:15){
+  desc[i] <- lapply(tbl[i], function(x) unlist(x[1, ]))
+  
+  tbl[i] <- lapply(tbl[i], function(x) {
+  data <- x[-1, ]
+  data[, -1] <- lapply(data[, -1], function(col) suppressWarnings(as.numeric(col)))
+  data
+})
+  
+} #conversion en numériques
+
+#
+
+df_all <- bind_rows(
+  lapply(2010:2024, function(y) {
+    tbl[[as.character(y)]] %>% mutate(année = y)
+  })
+)
+
+df_all %>%
+  select(année, S1501_C01_001E, S1501_C01_016E, S1501_C01_019E,S1501_C01_022E,S1501_C01_025E) %>%
+  pivot_longer(cols = -année, names_to = "classe_dage", values_to = "value") %>%
+  mutate(classe_dage = factor(classe_dage, 
+                                  levels = c("S1501_C01_001E",
+                                             "S1501_C01_016E",
+                                             "S1501_C01_019E",
+                                             "S1501_C01_022E",
+                                             "S1501_C01_025E")))%>%
+  group_by(année, classe_dage) %>%
+  summarise(value = sum(value, na.rm = TRUE)) %>%
+  mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
+  ggplot(aes(x = factor(année), y = proportion, fill = classe_dage)) +
+  geom_bar(stat = "identity")+
+  labs(title = "Distribution des classes d'âge dans le comté de Ventura (2010-2024)",x = "années", y = "", fill = "Classe d'âge")+
+  scale_fill_manual(values = c("S1501_C01_001E" = "cyan3",
+               "S1501_C01_016E" = "green3",
+               "S1501_C01_019E" = "salmon",
+               "S1501_C01_022E" = "mediumpurple",
+                "S1501_C01_025E"= "red3"),
+    labels = c("S1501_C01_001E" = "18 à 24 ans",
+               "S1501_C01_016E" = "25 à 34 ans",
+               "S1501_C01_019E" = "35 à 44 ans",
+               "S1501_C01_022E" = "45 à 64 ans",
+               "S1501_C01_025E" = "65 ans et plus"))
+
+#
+
+df_all <- bind_rows(
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>% mutate(année = y)
+  })
+)
+
+df_all %>%
+  select(année, S1501_C01_031E, S1501_C01_052E, S1501_C01_040E,S1501_C01_034E) %>%
+  pivot_longer(cols = -année, names_to = "groupe_ethnique", values_to = "value") %>%
+  mutate(groupe_ethnique = factor(groupe_ethnique, 
+                                  levels = c("S1501_C01_031E",
+                                             "S1501_C01_052E",
+                                             "S1501_C01_040E",
+                                             "S1501_C01_034E")))%>%
+  group_by(année, groupe_ethnique) %>%
+  summarise(value = sum(value, na.rm = TRUE)) %>%
+  mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
+  ggplot(aes(x = factor(année), y = proportion, fill = groupe_ethnique)) +
+  geom_bar(stat = "identity")+
+  labs(title= "Répartition ethnique du comté de Ventura (2015-2024)",x = "années", y = "", fill = "Groupe ethnique")+
+  scale_fill_manual(values = c("S1501_C01_031E" = "cyan3",
+               "S1501_C01_052E" = "green3",
+               "S1501_C01_040E" = "salmon",
+               "S1501_C01_034E" = "mediumpurple"),
+    labels = c("S1501_C01_031E" = "Blanc",
+               "S1501_C01_052E" = "Hispanique",
+               "S1501_C01_040E" = "Asiatique",
+               "S1501_C01_034E" = "Noir"))
+
+#
+
+df_all <- bind_rows(
+  lapply(2010:2014, function(y) {
+    tbl[[as.character(y)]] %>%
+      mutate(sublycee = S1501_C01_002E,
+             lycee      = S1501_C01_003E,
+             uni  = S1501_C01_004E,
+             bachelor       = S1501_C01_005E,
+             année = y) %>%
+      select(année, sublycee,lycee,uni,bachelor) 
+      
+  }),
+  
+  
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>%
+      mutate(sublycee = S1501_C01_002E + S1501_C01_007E + S1501_C01_008E,
+             lycee      = S1501_C01_003E  + S1501_C01_009E,
+             uni  = S1501_C01_004E  + S1501_C01_010E + S1501_C01_011E,
+             bachelor       = S1501_C01_005E+S1501_C01_018E+S1501_C01_021E+S1501_C01_024E+S1501_C01_027E ,
+             année=y) %>%
+      select(année, sublycee, lycee, uni, bachelor) 
+      
+  })
+)
+
+
+df_all %>%
+  select(année, sublycee,lycee,uni,bachelor) %>%
+  pivot_longer(cols = -année, names_to = "niveau_detude", values_to = "value") %>%
+  mutate(niveau_detude = factor(niveau_detude, 
+                                  levels = c("sublycee",
+                                             "lycee",
+                                             "uni",
+                                             "bachelor")))%>%
+  group_by(année, niveau_detude) %>%
+  summarise(value = sum(value, na.rm = TRUE)) %>%
+  mutate(proportion = value / sum(value, na.rm = TRUE)) %>%
+  ggplot(aes(x = factor(année), y = proportion, fill = niveau_detude)) +
+  geom_bar(stat = "identity")+
+  labs(title= "Distribution du niveau d'étude dans le comté de Ventura",x = "années", y = "", fill = "Niveau d'étude")+
+  scale_fill_manual(values = c("sublycee" = "cyan3",
+               "lycee" = "green3",
+               "uni" = "salmon",
+               "bachelor" = "mediumpurple"),
+    labels = c("sublycee" = "En-dessous du lycée",
+               "lycee" = "Lycée",
+               "uni" = "Études Supérieures",
+               "bachelor" = "Bachelor ou plus"))
+
+
+#
+
+
+df_all <- bind_rows(
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>% mutate(année = y)
+  })
+)
+
+df_all %>%
+  group_by(année)%>%
+  summarise(bachelor_18 = sum(S1501_C01_005E),
+            bachelor_25 = sum(S1501_C01_018E),
+            bachelor_35 = sum(S1501_C01_021E),
+            bachelor_45 = sum(S1501_C01_024E),
+            bachelor_65 = sum(S1501_C01_027E),
+            tot_18=sum(S1501_C01_001E),
+            tot_25=sum(S1501_C01_016E),
+            tot_35=sum(S1501_C01_019E),
+            tot_45=sum(S1501_C01_022E),
+            tot_65=sum(S1501_C01_025E))%>%
+  mutate(pct_18=bachelor_18/tot_18,
+         pct_25=bachelor_25/tot_25,
+         pct_35=bachelor_35/tot_35,
+         pct_45=bachelor_45/tot_45,
+         pct_65=bachelor_65/tot_65)%>%
+  
+    
+    
+  
+  
+  
+  
+  
+  
+  select(année, pct_18,pct_25,pct_35,pct_45,pct_65) %>%
+  pivot_longer(cols = -année, names_to = "classe_dage", values_to = "value") %>%
+  
+  
+  group_by(année, classe_dage) %>%
+  
+  mutate(classe_dage = recode(classe_dage,
+                           "pct_18" = "18-24 ans",
+                           "pct_25"="25-34 ans",
+                           "pct_35"="35-44 ans",
+                           "pct_45"="45-64ans",
+                           "pct_65"="65 ans et plus"
+                           )) %>%
+  
+  
+  ggplot(aes(x = as.numeric(année), y = value, color = classe_dage)) +
+  
+  geom_point() +
+  geom_line()+
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Année", y = "", color = "Classe d'âge", title = "Pourcentage de personnes avec au moins un bachelor entre 2015 et 2024")
+
+#
+
+df_all <- bind_rows(
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>% mutate(année = y)
+  })
+)
+
+df_all %>%
+  group_by(année)%>%
+  summarise(bachelor_18 = sum(S1501_C01_005E),
+            bachelor_25 = sum(S1501_C01_018E),
+            bachelor_35 = sum(S1501_C01_021E),
+            bachelor_45 = sum(S1501_C01_024E),
+            bachelor_65 = sum(S1501_C01_027E),
+            tot_18=sum(S1501_C01_001E),
+            tot_25=sum(S1501_C01_016E),
+            tot_35=sum(S1501_C01_019E),
+            tot_45=sum(S1501_C01_022E),
+            tot_65=sum(S1501_C01_025E))%>%
+  mutate(pct_18=bachelor_18/tot_18,
+         pct_25=bachelor_25/tot_25,
+         pct_35=bachelor_35/tot_35,
+         pct_45=bachelor_45/tot_45,
+         pct_65=bachelor_65/tot_65)%>%
+  
+    
+    
+  
+  
+  
+  
+  
+  
+  select(année, pct_18,pct_25,pct_35,pct_45,pct_65) %>%
+  pivot_longer(cols = -année, names_to = "classe_dage", values_to = "value") %>%
+  
+  
+  group_by(année, classe_dage) %>%
+  
+  mutate(classe_dage = recode(classe_dage,
+                           "pct_18" = "18-24 ans",
+                           "pct_25"="25-34 ans",
+                           "pct_35"="35-44 ans",
+                           "pct_45"="45-64ans",
+                           "pct_65"="65 ans et plus"
+                           )) %>%
+  
+  
+  ggplot(aes(x = as.numeric(année), y = value, color = classe_dage)) +
+  
+  geom_point() +
+  geom_line()+
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Année", y = "", color = "Classe d'âge", title = "Pourcentage de personnes avec au moins un bachelor entre 2015 et 2024")
+
+
+#
+
+df_all <- bind_rows(
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>%
+      mutate(
+        
+        blanc_sublycee  = S1501_C01_031E-S1501_C01_032E,
+        blanc_lycee     = S1501_C01_032E-S1501_C01_033E,
+        blanc_bachelor  = S1501_C01_033E,
+        
+        hisp_sublycee   = S1501_C01_052E-S1501_C01_053E,
+        hisp_lycee      = S1501_C01_053E-S1501_C01_054E,
+        hisp_bachelor   = S1501_C01_054E,
+        
+        asia_sublycee   = S1501_C01_040E-S1501_C01_041E,
+        asia_lycee      = S1501_C01_041E-S1501_C01_042E,
+        asia_bachelor   = S1501_C01_042E,
+        
+        noir_sublycee   = S1501_C01_034E-S1501_C01_035E,
+        noir_lycee      = S1501_C01_035E-S1501_C01_036E,
+        noir_bachelor   = S1501_C01_036E,
+        
+        
+        année = y
+      ) %>%
+      select(année, starts_with("blanc"), starts_with("hisp"), starts_with("asia"),starts_with("noir"))
+  })
+)
+
+df_plot <- df_all %>%
+  pivot_longer(cols = -année,
+               names_to = c("groupe_ethnique", "niveau_detude"),
+               names_sep = "_",
+               values_to = "value") %>%
+  group_by(année, groupe_ethnique,niveau_detude) %>%
+  summarise(value = sum(value, na.rm = TRUE)) %>%
+  group_by(année, groupe_ethnique) %>%
+  mutate(proportion = value / sum(value, na.rm = TRUE))
+
+
+
+df_plot <- df_plot %>%
+  mutate(
+    groupe_ethnique = recode(groupe_ethnique,
+                             "blanc" = "Blanc",
+                             "hisp"  = "Hispanique",
+                             "asia"  = "Asiatique",
+                             "noir"  = "Noir"),
+    niveau_detude = recode(niveau_detude,
+                           "sublycee" = "En-dessous du lycée",
+                           "lycee"    = "Lycée",
+                           "bachelor" = "Bachelor ou plus"),
+   niveau_detude = factor(niveau_detude, 
+                           levels = c("En-dessous du lycée","Lycée", "Bachelor ou plus"))
+
+
+
+
+)
+
+
+
+
+
+plot_ly(df_plot,
+        x = ~groupe_ethnique,
+        y = ~proportion,
+        color = ~niveau_detude,
+       
+        frame = ~année,
+        type = "bar") %>%
+  layout(
+    title = "Niveau d'étude par groupe ethnique (2015-2024)",
+    barmode = "stack",
+    xaxis = list(title = ""),
+    yaxis = list(title = "Proportion", range = c(0, 1)),
+    legend = list(title = list(text = "Niveau d'étude"))
+  
+  ) %>%
+  animation_opts(frame = 800, transition = 300) %>%
+  animation_slider(currentvalue = list(prefix = "Année: "))
+
+
+#
+
+df_all <- bind_rows(
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>% mutate(année = y)
+  })
+)
+
+
+
+df_all %>%
+  group_by(année)%>%
+  mutate(tcc = ( S1501_C01_007E + S1501_C01_008E)*S1501_C02_055E,
+         tcl = ( S1501_C01_009E)*S1501_C02_056E,
+         tcu =( S1501_C01_010E + S1501_C01_011E)*S1501_C02_057E,
+         tcb =(S1501_C01_018E+S1501_C01_021E+S1501_C01_024E+S1501_C01_027E)*S1501_C02_058E)%>%
+  summarise(totc = sum(S1501_C01_007E + S1501_C01_008E),
+            totl = sum(S1501_C01_009E),
+            totu =sum(S1501_C01_010E + S1501_C01_011E),
+            totb=sum(S1501_C01_018E+S1501_C01_021E+S1501_C01_024E+S1501_C01_027E),
+            tpc=sum(tcc,na.rm = TRUE)/totc,
+            tpl=sum(tcl,na.rm = TRUE)/totl,
+            tpu=sum(tcu,na.rm = TRUE)/totu,
+            tpb=sum(tcb,na.rm = TRUE)/totb)%>%
+  
+  select(année, tpc,tpl,tpu,tpb) %>%
+  pivot_longer(cols = -année, names_to = "niveau_detude", values_to = "value") %>%
+  
+  
+  group_by(année, niveau_detude) %>%
+  
+  mutate(niveau_detude = recode(niveau_detude,
+                           "tpc" = "En-dessous du lycée",
+                           "tpl"="Lycée",
+                           "tpu"="Études supérieures",
+                           "tpb"="Bachelor ou plus",
+                           
+                           )) %>%
+  
+  
+  ggplot(aes(x = as.numeric(année), y = value, color = niveau_detude)) +
+  
+  geom_point() +
+  geom_line()+
+  
+  labs(x = "Année", y = "", color = "Niveau d'étude", title = "Taux de pauvreté (en %) par niveau d'étude entre 2015 et 2024")
+
+#
+
+
+df_all <- bind_rows(
+  lapply(2015:2024, function(y) {
+    tbl[[as.character(y)]] %>%
+      mutate(
+        taux_b = (S1501_C01_005E+S1501_C01_018E+S1501_C01_021E+S1501_C01_024E+S1501_C01_027E)/(S1501_C01_006E),
+        revm = S1501_C01_059E,
+        
+        taux_pauv = 0.01*((S1501_C02_007E +S1501_C02_008E)*S1501_C02_055E + (S1501_C02_009E)*S1501_C02_056E + (S1501_C02_010E +S1501_C02_011E)*S1501_C02_057E + S1501_C02_015E*S1501_C02_058E),
+        
+        pop_tot = S1501_C01_001E + S1501_C01_006E,
+        
+        hisp = S1501_C01_031E < S1501_C01_052E,
+        
+        année = y
+      ) %>%
+      select(année,hisp, taux_b,revm,taux_pauv,pop_tot)
+  })
+)
+
+df_plot <- df_all %>%
+  mutate(color = ifelse(hisp, "Plus d'hispaniques", "Plus de blancs"))
+
+plot_ly(df_plot,
+        x = ~taux_b,
+        y = ~revm,
+        z = ~taux_pauv,
+        size = ~pop_tot,
+        sizes=c(1,10),
+        color = ~color,
+        colors = c("Plus d'hispaniques"     = "red",
+                   "Plus de blancs" = "blue"),
+        frame = ~année,
+        type = "scatter3d",
+        mode = "markers",
+        marker = list(sizemode = "diameter", opacity = 0.7)) %>%
+  layout(
+    title = "Niveau d'étude, revenu et pauvreté par année",
+    scene = list(
+      xaxis = list(title = "Taux de bachelor"),
+      yaxis = list(title = "Revenu médian annuel"),
+      zaxis = list(title = "Taux de pauvreté")
+    ),
+    legend = list(title = list(text = "Groupe ethnique majoritaire"))
+  ) %>%
+  animation_opts(frame = 800, transition = 300) %>%
+  animation_slider(currentvalue = list(prefix = "Année: "))
+
+
+```
